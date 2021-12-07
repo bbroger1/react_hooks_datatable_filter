@@ -1,25 +1,46 @@
-import logo from './logo.svg';
-import './App.css';
+import react, { useState, useEffect } from "react";
+import axios from "axios";
+import Datatable from "./datatable/index.js";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+
+    const [data, setData] = useState([]);
+    const [filter, setFilter] = useState("");
+
+    useEffect(() => {
+        axios.get("http://jsonplaceholder.typicode.com/posts")
+            .then(response => setData(response.data)
+            )
+            .catch(error => console.log(error))
+
+    }, []);
+
+    function search(rows) {
+        const columns = rows[0] && Object.keys(rows[0]);
+
+        return rows.filter((row) =>
+            columns.some(
+                (column) => row[column].toString().toLowerCase().indexOf(filter.toLowerCase()) > -1
+            )
+        );
+        /*return rows.filter(
+            (row) =>
+                row.title.toLowerCase().indexOf(filter) > -1 ||
+                row.body.toLowerCase().indexOf(filter) > -1
+        );*/
+    }
+
+    return (
+        <div className="container">
+            <div>
+                <input type="text" value={filter} onChange={(e) => setFilter(e.target.value)} />
+            </div>
+
+            <div>
+                <Datatable data={search(data)} />
+            </div>
+        </div>
+    );
 }
 
 export default App;
